@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Un utilisateur peut créer plusieurs articles mais un article peut etre crée que par un seul utilisateur
+
+model User {
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
+  first_name String
+  last_name  String
+  password   String
+  picture    String?
+  articles   Article[] // Relation one-to-many avec le model Article
+  like       Like?
+}
+
+model Article {
+  id         Int      @id @default(autoincrement())
+  content    String
+  published  Boolean  @default(false)
+  author     User     @relation(fields: [authorId], references: [id]) // creation de la relation avec le model User
+  authorId   Int // champ pour stocker l'ID de l'auteur
+  created_at DateTime @default(now())
+  like       Like[]
+}
+
+model Like {
+  id        Int     @id @default(autoincrement())
+  status    Boolean @default(false)
+  author    User    @relation(fields: [authorId], references: [id])
+  authorId  Int     @unique
+  articleId Int
+  article   Article @relation(fields: [articleId], references: [id])
+}
